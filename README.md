@@ -1,4 +1,3 @@
-================
 Welcome to M220J
 ================
 
@@ -45,7 +44,7 @@ to pass!
 
 
 Project Structure
-~~~~~~~~~~~~~~~~~
+-----------------
 
 MFlix is composed of two main components:
 
@@ -77,7 +76,7 @@ More on that below.
 
 
 Database Layer
-~~~~~~~~~~~~~~
+--------------
 
 We will be using *MongoDB Atlas*, MongoDB's official Database as a Service (DBaaS),
 so you will not need to manage the database component yourself. However, you will
@@ -87,7 +86,7 @@ your database with the shell.
 
 
 Local Environment Dependencies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 
 There are two main system dependencies in this course:
 
@@ -105,7 +104,7 @@ There are two main system dependencies in this course:
 
 
 Java Project (MFlix) Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 
 The ``mflix`` project is supported by a `Maven` POM file that deals with all the
 dependencies required, as well as providing the ``test`` and ``run`` commands
@@ -130,17 +129,16 @@ project folder. The project folder contains the application code, the
 ``pom.xml`` file that you would import into your IDE, and the dataset
 required that you will have to import to Atlas.
 
-.. code-block:: sh
-
+```
   $ ls
   mflix README.rst
   $ cd mflix
   $ ls
   src pom.xml data
-
+```
 
 Running the Application
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 In the ``mflix/src/main/resources`` directory you can find a file called
 ``application.properties``.
@@ -148,17 +146,15 @@ In the ``mflix/src/main/resources`` directory you can find a file called
 Open this file and enter your *Atlas SRV* connection string as directed in the
 comment. This is the information the driver will use to connect. Make sure
 **not** to wrap your *Atlas SRV* connection between quotes::
-
+```
   spring.mongodb.uri=mongodb+srv://m220student:m220password@<YOUR_CLUSTER_URI>
-
+```
 To run MFlix, run the following command:
-
-.. code-block:: sh
-
+```
   cd mflix
   mvn spring-boot:run
-
-And then point your browser to `http://localhost:5000/ <http://localhost:5000/>`_.
+```
+And then point your browser to `http://localhost:5000/`
 
 It is recommended you use an IDE for this course. Ensure you choose an IDE that
 supports importing a Maven project. We recommend IntelliJ Community_ but you
@@ -167,27 +163,27 @@ can use the product of your choice.
 The first time running the application might take a little longer due to the
 initial setup process.
 
-.. _Community: https://www.jetbrains.com/idea/download
+* Community: https://www.jetbrains.com/idea/download
 
 
 Running the Unit Tests
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 To run the unit tests for this course, you will use ``JUnit``. Each course lab
 contains a module of unit tests that you can call individually with a command
 like the following:
 
-.. code-block:: sh
-
+```
   cd mflix
   mvn -Dtest=<TestClass> test
+```
 
 For example to run the ConnectionTest test your shell command will be:
 
-.. code-block:: sh
-
+```
   cd mflix
   mvn -Dtest=ConnectionTest test
+```
 
 Alternatively, if using an IDE, you should be able to run the Unit Tests
 individually by clicking on a green play button next to them. You will see this
