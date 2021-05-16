@@ -79,8 +79,8 @@ public class CommentDao extends AbstractMFlixDao {
 
         // TODO> Ticket - Update User reviews: implement the functionality that enables adding a new
         // comment.
-        if(comment.getId() == null) {
-            throw new IncorrectDaoOperation("Comment '_id' cannot be null");
+        if(comment.getId() == null || comment.getId().trim() == "") {
+            throw new IncorrectDaoOperation("Comment '_id' cannot be null or empty");
         }
         this.commentCollection.withWriteConcern(WriteConcern.MAJORITY)
                 .insertOne(comment);
@@ -107,7 +107,6 @@ public class CommentDao extends AbstractMFlixDao {
 
         // TODO> Ticket - Update User reviews: implement the functionality that enables updating an
         // user own comments
-
         Bson filter = Filters.and(Filters.eq("_id", new ObjectId(commentId)), Filters.eq("email", email));
         Bson update = Updates.combine(
                 Updates.set("text", text),
@@ -131,9 +130,20 @@ public class CommentDao extends AbstractMFlixDao {
         // TODO> Ticket Delete Comments - Implement the method that enables the deletion of a user
         // comment
         // TIP: make sure to match only users that own the given commentId
+        if(commentId == null || commentId.trim() == "") {
+            throw new IllegalArgumentException("'commentId' cannot be null or empty");
+        }
+
+        DeleteResult deleteResult = this.commentCollection
+                .withWriteConcern(WriteConcern.MAJORITY)
+                .deleteOne(Filters.and(
+                Filters.eq("email", email),
+                Filters.eq("_id", new ObjectId(commentId))
+        ));
+
         // TODO> Ticket Handling Errors - Implement a try catch block to
         // handle a potential write exception when given a wrong commentId.
-        return false;
+        return deleteResult.wasAcknowledged() && deleteResult.getDeletedCount() > 0;
     }
 
     /**
