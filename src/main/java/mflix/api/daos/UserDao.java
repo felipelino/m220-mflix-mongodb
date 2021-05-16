@@ -24,7 +24,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -149,8 +151,26 @@ public class UserDao extends AbstractMFlixDao {
     public boolean updateUserPreferences(String email, Map<String, ?> userPreferences) {
         //TODO> Ticket: User Preferences - implement the method that allows for user preferences to
         // be updated.
+        if(userPreferences != null) {
+            Map<String, Object> notNullPreferences = new HashMap<>();
+            for (Map.Entry<String, ?> entry: userPreferences.entrySet()) {
+                Object value = entry.getValue();
+                if(entry.getKey() != null &&  value != null) {
+                    notNullPreferences.put(entry.getKey(), value);
+                }
+            }
+
+            Bson updateFilter = new Document("email", email);
+            Bson setUpdate = Updates.set("preferences", notNullPreferences);
+            UpdateResult result = this.usersCollection.updateOne(updateFilter, setUpdate);
+            return result.wasAcknowledged() && result.getModifiedCount() > 0;
+        }
+        else {
+            throw new IncorrectDaoOperation("updateUserPreferences should not be null");
+        }
+
         //TODO > Ticket: Handling Errors - make this method more robust by
         // handling potential exceptions when updating an entry.
-        return false;
+        //return false;
     }
 }
