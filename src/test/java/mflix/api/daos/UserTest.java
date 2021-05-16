@@ -49,6 +49,17 @@ public class UserTest extends TicketTest {
         .getDatabase(databaseName)
         .getCollection("users")
         .deleteOne(new Document("email", "log@out.com"));
+/*
+    mongoClient
+            .getDatabase(databaseName)
+            .getCollection("users")
+            .deleteOne(new Document("email", "gryffindor@hogwarts.edu"));
+
+    mongoClient
+            .getDatabase(databaseName)
+            .getCollection("sessions")
+            .deleteOne(new Document("user_id", "gryffindor@hogwarts.edu"));
+*/
   }
 
   @After
