@@ -205,8 +205,27 @@ public class MovieDao extends AbstractMFlixDao {
         List<Document> movies = new ArrayList<>();
         // TODO > Ticket: Paging - implement the necessary cursor methods to support simple
         // pagination like skip and limit in the code below
-        moviesCollection.find(castFilter).sort(sort).iterator()
+        moviesCollection.find(castFilter)
+                .sort(sort)
+                .limit(limit)
+                .skip(skip)
+                .iterator()
         .forEachRemaining(movies::add);
+
+        /*
+        Bson matchStage = Aggregates.match(castFilter);
+        Bson skipStage = Aggregates.skip(skip);
+        Bson sortStage = Aggregates.sort(Sorts.descending(sortKey));
+        Bson limitStage = Aggregates.limit(limit);
+
+        List<Bson> aggregatePipeline = new ArrayList<>();
+        aggregatePipeline.add(matchStage);
+        aggregatePipeline.add(sortStage);
+        aggregatePipeline.add(skipStage);
+        aggregatePipeline.add(limitStage);
+
+        moviesCollection.aggregate(aggregatePipeline).into(movies);*/
+
         return movies;
     }
 

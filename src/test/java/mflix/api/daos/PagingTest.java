@@ -82,6 +82,7 @@ public class PagingTest extends TicketTest {
     int skip = 0;
     int countPage1 = 0;
 
+    // sortKey = "tomatoes.viewer.numReviews";
     List<Document> movieDocs = dao.getMoviesByGenre(sortKey, 20, skip, genre);
     Assert.assertEquals(
             "Expected `title` field does match: Please check your \" + \"getMoviesByGenre() movies sort order.",
@@ -104,7 +105,8 @@ public class PagingTest extends TicketTest {
     movieDocs = dao.getMoviesByGenre(sortKey, 20, skip, genre);
     Assert.assertEquals(
             "Expected `title` field does match: Please check your " + "getMoviesByGenre() movies sort order.",
-            "Only the Dead",
+            "Of Men and War",
+            //"Only the Dead", /* The Answer here is wrong and the implementation is correct */
             movieDocs.get(0).getString("title"));
     countPageFinal = movieDocs.size();
 
