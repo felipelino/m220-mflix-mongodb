@@ -3,16 +3,15 @@ package mflix.api.daos;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoWriteException;
 import com.mongodb.ReadConcern;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Sorts;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.*;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import mflix.api.models.Comment;
 import mflix.api.models.Critic;
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -79,9 +79,15 @@ public class CommentDao extends AbstractMFlixDao {
 
         // TODO> Ticket - Update User reviews: implement the functionality that enables adding a new
         // comment.
+        if(comment.getId() == null) {
+            throw new IncorrectDaoOperation("Comment '_id' cannot be null");
+        }
+        this.commentCollection.withWriteConcern(WriteConcern.MAJORITY)
+                .insertOne(comment);
+
         // TODO> Ticket - Handling Errors: Implement a try catch block to
         // handle a potential write exception when given a wrong commentId.
-        return null;
+        return comment;
     }
 
     /**
@@ -101,9 +107,17 @@ public class CommentDao extends AbstractMFlixDao {
 
         // TODO> Ticket - Update User reviews: implement the functionality that enables updating an
         // user own comments
+
+        Bson filter = Filters.and(Filters.eq("_id", new ObjectId(commentId)), Filters.eq("email", email));
+        Bson update = Updates.combine(
+                Updates.set("text", text),
+                Updates.set("date", new Date())
+        );
+        UpdateResult result = this.commentCollection.updateOne(filter, update);
+
         // TODO> Ticket - Handling Errors: Implement a try catch block to
         // handle a potential write exception when given a wrong commentId.
-        return false;
+        return result.wasAcknowledged() && result.getModifiedCount() > 0;
     }
 
     /**
