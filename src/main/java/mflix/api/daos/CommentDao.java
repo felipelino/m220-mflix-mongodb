@@ -4,6 +4,7 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoWriteException;
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.*;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static com.mongodb.client.model.Sorts.descending;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -161,6 +163,31 @@ public class CommentDao extends AbstractMFlixDao {
         // // guarantee for the returned documents. Once a commenter is in the
         // // top 20 of users, they become a Critic, so mostActive is composed of
         // // Critic objects.
+
+        Bson groupStage = Aggregates.group("$email", Accumulators.sum("count", 1));
+
+        /* Alternative */
+        Bson groupByCountStage = Aggregates.sortByCount("$email");
+
+
+        // Useless because precious stage the _id is the $email content.
+        Bson projectStage = Aggregates.project(Projections.fields(
+                new Document("_id", "$_id"), new Document("count", 1)));
+        List<Bson> pipeline = Arrays.asList(
+            groupStage,
+            Aggregates.sort(descending("count")),
+            Aggregates.limit(20),
+            projectStage
+        );
+
+        System.out.println(projectStage.toBsonDocument(BsonDocument.class,
+                        MongoClientSettings.getDefaultCodecRegistry()));
+
+        this.commentCollection
+                .withReadConcern(ReadConcern.MAJORITY)
+                .aggregate(pipeline, Critic.class)
+                .into(mostActive);
+
         return mostActive;
     }
 }
