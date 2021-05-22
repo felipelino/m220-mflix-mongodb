@@ -1,9 +1,6 @@
 package mflix.api.daos;
 
-import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoWriteException;
-import com.mongodb.ReadConcern;
-import com.mongodb.WriteConcern;
+import com.mongodb.*;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -77,18 +74,23 @@ public class CommentDao extends AbstractMFlixDao {
      * @throw IncorrectDaoOperation if the insert fails, otherwise
      * returns the resulting Comment object.
      */
-    public Comment addComment(Comment comment) {
+    public Comment addComment(Comment comment) throws IncorrectDaoOperation {
 
         // TODO> Ticket - Update User reviews: implement the functionality that enables adding a new
         // comment.
         if(comment.getId() == null || comment.getId().trim() == "") {
             throw new IncorrectDaoOperation("Comment '_id' cannot be null or empty");
         }
-        this.commentCollection.withWriteConcern(WriteConcern.MAJORITY)
-                .insertOne(comment);
+        try {
+            this.commentCollection.withWriteConcern(WriteConcern.MAJORITY)
+                    .insertOne(comment);
 
-        // TODO> Ticket - Handling Errors: Implement a try catch block to
-        // handle a potential write exception when given a wrong commentId.
+            // TODO> Ticket - Handling Errors: Implement a try catch block to
+            // handle a potential write exception when given a wrong commentId.
+        }
+        catch (WriteConcernException | MongoWriteException  exc) {
+            throw new IncorrectDaoOperation(exc.getMessage(), exc);
+        }
         return comment;
     }
 
@@ -114,11 +116,15 @@ public class CommentDao extends AbstractMFlixDao {
                 Updates.set("text", text),
                 Updates.set("date", new Date())
         );
-        UpdateResult result = this.commentCollection.updateOne(filter, update);
-
-        // TODO> Ticket - Handling Errors: Implement a try catch block to
-        // handle a potential write exception when given a wrong commentId.
-        return result.wasAcknowledged() && result.getModifiedCount() > 0;
+        try {
+            // TODO> Ticket - Handling Errors: Implement a try catch block to
+            // handle a potential write exception when given a wrong commentId.
+            UpdateResult result = this.commentCollection.updateOne(filter, update);
+            return result.wasAcknowledged() && result.getModifiedCount() > 0;
+        }
+        catch (WriteConcernException | MongoWriteException  exc) {
+            return false;
+        }
     }
 
     /**
@@ -136,16 +142,21 @@ public class CommentDao extends AbstractMFlixDao {
             throw new IllegalArgumentException("'commentId' cannot be null or empty");
         }
 
-        DeleteResult deleteResult = this.commentCollection
-                .withWriteConcern(WriteConcern.MAJORITY)
-                .deleteOne(Filters.and(
-                Filters.eq("email", email),
-                Filters.eq("_id", new ObjectId(commentId))
-        ));
+        try {
+            DeleteResult deleteResult = this.commentCollection
+                    .withWriteConcern(WriteConcern.MAJORITY)
+                    .deleteOne(Filters.and(
+                            Filters.eq("email", email),
+                            Filters.eq("_id", new ObjectId(commentId))
+                    ));
 
-        // TODO> Ticket Handling Errors - Implement a try catch block to
-        // handle a potential write exception when given a wrong commentId.
-        return deleteResult.wasAcknowledged() && deleteResult.getDeletedCount() > 0;
+            // TODO> Ticket Handling Errors - Implement a try catch block to
+            // handle a potential write exception when given a wrong commentId.
+            return deleteResult.wasAcknowledged() && deleteResult.getDeletedCount() > 0;
+        }
+        catch (WriteConcernException | MongoWriteException exc) {
+            return false;
+        }
     }
 
     /**

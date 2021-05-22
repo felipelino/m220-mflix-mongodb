@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.fields;
@@ -44,11 +46,26 @@ public class MovieDao extends AbstractMFlixDao {
      * @param movieId - Movie object identifier
      * @return true if valid movieId.
      */
+
+    private static final Pattern HEXADECIMAL_PATTERN = Pattern.compile("\\p{XDigit}+");
     private boolean validIdValue(String movieId) {
         //TODO> Ticket: Handling Errors - implement a way to catch a
         //any potential exceptions thrown while validating a movie id.
         //Check out this method's use in the method that follows.
+
+        final Matcher matcher = HEXADECIMAL_PATTERN.matcher(movieId);
+        return matcher.matches();
+
+        /*
+        Other possible solution
+        try{
+            new ObjectId(movieId);
+        } catch (IllegalArgumentException e){
+            // value cannot be transformed into mongodb ObjectID
+            return false;
+        }
         return true;
+         */
     }
 
     /**
